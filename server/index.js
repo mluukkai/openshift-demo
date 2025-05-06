@@ -80,13 +80,14 @@ app.listen(PORT, async () => {
   try {
     await sequelize.authenticate();
     console.log('Connected to the database');
-    Counter.sync()
+    await Counter.sync()
       .then(() => {
         console.log('Counter table exists or has been created');
       })
       .catch((error) => {
         console.error('Unable to create table:', error);
       });
+
     const count = await Counter.count();
     if (count === 0) {
       await Counter.create({ value: 0 });
