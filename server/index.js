@@ -6,25 +6,14 @@ if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config();
 }
 
-console.log(process.env.DB_URL)
-const sequelize = new Sequelize(process.env.DB_URL, {
-  dialectOptions: {
-    ssl: {
-      require: true,
-      rejectUnauthorized: false
-    }
-  }
-})
-
-
-const sequelize2 = new Sequelize({
+const sequelize = new Sequelize({
   database: process.env.DB_NAME,
   username: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   host: process.env.DB_HOST,
   port: 5432,
   dialect: 'postgres',
-  dialectOptions: {
+  dialectOptions: process.env.NODE_ENV !== 'production' ? {} : {
     ssl: {
       require: true,
       rejectUnauthorized: false
