@@ -13,7 +13,7 @@ const sequelize = new Sequelize({
   host: process.env.DB_HOST,
   port: 5432,
   dialect: 'postgres',
-  dialectOptions: process.env.NODE_ENV !== 'production' ? {} : {
+  dialectOptions: process.env.SSL !== 'true' ? {} : {
     ssl: {
       require: true,
       rejectUnauthorized: false
