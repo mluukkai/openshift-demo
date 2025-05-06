@@ -7,8 +7,17 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 console.log(process.env.DB_URL)
-//const sequelize = new Sequelize(process.env.DB_URL)
-const sequelize = new Sequelize({
+const sequelize = new Sequelize(process.env.DB_URL, {
+  dialectOptions: {
+    ssl: {
+      require: true,
+      rejectUnauthorized: false
+    }
+  }
+})
+
+
+const sequelize2 = new Sequelize({
   database: process.env.DB_NAME,
   username: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
