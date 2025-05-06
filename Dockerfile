@@ -8,10 +8,7 @@ RUN npm install
 
 COPY . .
 
-RUN adduser appuser
-RUN chown -R appuser /app
-
-USER appuser
+RUN chmod -R 777 *
 
 RUN npm run build
 
