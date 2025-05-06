@@ -8,7 +8,7 @@ RUN npm install
 
 COPY . .
 
-#RUN chmod -R 777 *
+RUN chmod -R 777 *
 
 RUN npm run build
 

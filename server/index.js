@@ -33,6 +33,10 @@ const app = express();
 
 app.use(express.json());
 
+app.get('/api/ping', async (req, res) => {
+  res.json({ message: 'pong' });
+});
+
 app.get('/api/counter', async (req, res) => {
   const counter = await Counter.findOne();
   res.json(counter);
