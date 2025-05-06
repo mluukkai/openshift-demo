@@ -7,7 +7,7 @@ function App() {
   useEffect(() => {
     axios.get('/api/counter')
       .then(response => {
-        setCount(response.data.counter)
+        setCount(response.data.value)
       })
   }, [])
 
