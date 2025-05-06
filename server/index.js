@@ -6,7 +6,7 @@ if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config();
 }
 
-const dbConf = {
+let dbConf = {
   database: process.env.DB_NAME,
   username: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
@@ -20,6 +20,8 @@ const dbConf = {
     }
   }
 }
+
+dbConf = process.env.DB_URL
 
 const sequelize = new Sequelize(dbConf);
 
