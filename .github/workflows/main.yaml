@@ -24,4 +24,4 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/demoapp:16
+          tags: ${{ secrets.DOCKER_USERNAME }}/demoapp:17

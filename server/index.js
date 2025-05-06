@@ -6,26 +6,8 @@ if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config();
 }
 
-let dbConf = {
-  database: process.env.DB_NAME,
-  username: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  host: process.env.DB_HOST,
-  port: 5432,
-  dialect: 'postgres',
-  dialectOptions: process.env.SSL !== 'enabled' ? {} : {
-    ssl: {
-      require: true,
-      rejectUnauthorized: false
-    }
-  }
-}
-
-dbConf = process.env.DB_URL
-
-const sequelize = new Sequelize(dbConf);
-
-console.log('DB_CONF', dbConf);
+const dbUrl = process.env.DB_URL
+const sequelize = new Sequelize(dbUrl);
 
 class Counter extends Model {}
 
@@ -82,6 +64,7 @@ if (process.env.NODE_ENV === 'production') {
 app.listen(PORT, async () => {
   console.log(`Server running on http://localhost:${PORT}`);
   try {
+    console.log('Connecting to the database in', dbUrl);
     await sequelize.authenticate();
     console.log('Connected to the database');
     await Counter.sync()
@@ -98,6 +81,6 @@ app.listen(PORT, async () => {
       console.log('Initialized counter with value 0');
     }
   } catch (error) {
-    console.error('Unable to connect to the database:', error);
+    console.error('Unable to connect to the database', error);
   }
 });
