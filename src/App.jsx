@@ -30,7 +30,7 @@ function App() {
   return (
     <>
       <h2>The Ohtucounter</h2>
-      <div>count is {count}</div>
+      <div>Count is now {count}</div>
       <div style={{ marginTop: 10 }}>
         <button onClick={() => setTo(count + 1)}>
           Increment
