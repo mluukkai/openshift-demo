@@ -29,6 +29,7 @@ function App() {
 
   return (
     <>
+      <h2>Ohtucounter</h2>
       <div>count is {count}</div>
       <button onClick={() => setTo(count + 1)}>
         increment
