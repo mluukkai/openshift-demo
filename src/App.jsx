@@ -31,12 +31,14 @@ function App() {
     <>
       <h2>The Ohtucounter</h2>
       <div>count is {count}</div>
-      <button onClick={() => setTo(count + 1)}>
-        increment
-      </button>
-      <button onClick={() => setTo(0)}>
-        reset
-      </button>
+      <div style={{ marginTop: 10 }}>
+        <button onClick={() => setTo(count + 1)}>
+          Increment
+        </button>
+        <button onClick={() => setTo(0)}>
+          Reset
+        </button>
+      </div>
     </>
   )
 }
