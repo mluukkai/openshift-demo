@@ -17,3 +17,11 @@ spec:
         scheduled: true
       referencePolicy:
         type: Local
+    - name: mongo
+      from:
+        kind: DockerImage
+        name: mluukkai/demoapp:mongo
+      importPolicy:
+        scheduled: true
+      referencePolicy:
+        type: Local

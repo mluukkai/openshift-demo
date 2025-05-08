@@ -1,0 +1,14 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+
+metadata:
+  name: demoapp-claim
+  namespace: toska-playground
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: data-2
+  volumeMode: Filesystem

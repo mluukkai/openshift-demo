@@ -4,7 +4,7 @@ metadata:
   annotations:
     alpha.image.policy.openshift.io/resolve-names: "*"
     image.openshift.io/triggers: >-
-      [{"from":{"kind":"ImageStreamTag","name":"demoapp:staging","namespace":"toska-playground"},"fieldPath":"spec.template.spec.containers[?(@.name==\"demoapp\")].image","pause":"false"}]
+      [{"from":{"kind":"ImageStreamTag","name":"demoapp:mongo","namespace":"toska-playground"},"fieldPath":"spec.template.spec.containers[?(@.name==\"demoapp\")].image","pause":"false"}]
   name: demoapp-dep
 spec:
   replicas: 1
@@ -18,14 +18,12 @@ spec:
     spec:
       containers:
         - name: demoapp
-          image: demoapp:staging
+          image: demoapp:mongo
           imagePullPolicy: Always
           ports:
             - containerPort: 3000
           env:
-            - name: DB_URL
-              valueFrom:
-                configMapKeyRef:
-                  name: demoapp-config
-                  key: DB_URL 
+            - name: MONGO_DB_URL
+              value: mongodb://demo_user:demo_password@demoapp-mongo-svc:27017
+   
               

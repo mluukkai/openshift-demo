@@ -29,7 +29,7 @@ function App() {
 
   return (
     <>
-      <h2>The Ohtucounter</h2>
+      <h2>The Ohtucounter - MongoDB edition</h2>
       <div>Count is now {count}</div>
       <div style={{ marginTop: 10 }}>
         <button onClick={() => setTo(count + 1)}>

@@ -7,7 +7,7 @@ if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config();
 }
 
-const dbUrl = process.env.DB_URL
+const dbUrl = process.env.MONGO_DB_URL
 
 const schema = new mongoose.Schema({
   value: Number,

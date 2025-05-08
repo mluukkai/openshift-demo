@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demoapp-mongo-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: demoapp-mongo
+  template:
+    metadata:
+      labels:
+        app: demoapp-mongo
+    spec:
+      containers:
+        - name: my-mongo
+          image: mongo
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 27017
+          env:
+            - name: MONGO_INITDB_ROOT_USERNAME
+              value: demo_user
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              value: demo_password
+          volumeMounts:
+            - mountPath: /data/db
+              name: demoapp-volume
+      volumes:
+        - name: demoapp-volume
+          persistentVolumeClaim:
+            claimName: demoapp-claim
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: demoapp-mongo-svc
+spec:
+  selector:
+    app: demoapp-mongo
+  ports:
+    - protocol: TCP
+      port: 27017
+      targetPort: 27017
+  type: ClusterIP
