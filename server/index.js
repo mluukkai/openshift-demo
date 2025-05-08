@@ -1,32 +1,19 @@
 const express = require('express');
 const path = require('path');
-const { Sequelize, DataTypes, Model } = require('sequelize');
+const mongoose = require('mongoose')
+mongoose.set('strictQuery', false)
 
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config();
 }
 
 const dbUrl = process.env.DB_URL
-const sequelize = new Sequelize(dbUrl);
 
-class Counter extends Model {}
-
-Counter.init({
-  id: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true
-  },
-  value: {
-    type: DataTypes.INTEGER,
-    allowNull: false
-  },
-}, {
-  sequelize,
-  underscored: true,
-  timestamps: false,
-  modelName: 'counter'
+const schema = new mongoose.Schema({
+  value: Number,
 })
+
+const Counter = mongoose.model('Counter', schema)
 
 const PORT = process.env.PORT || 3000;
 const app = express();
@@ -38,18 +25,16 @@ app.get('/api/ping', async (req, res) => {
 });
 
 app.get('/api/counter', async (req, res) => {
-  const counter = await Counter.findOne();
+  const counter = await Counter.findOne()
   res.json(counter);
 });
 
 app.post('/api/counter', async (req, res) => {
   const { value } = req.body;
-
-  const counter = await Counter.findOne();
+  const counter = await Counter.findOne()
   counter.value = value;
   await counter.save();
-
-  res.json({ value: counter });
+  res.json(counter);
 })
 
 // jos ollaan tuotannossa, tarjotaan dist-hakemistoon käännetty frontend sovelluksen juuriosoiteessa
@@ -65,21 +50,16 @@ app.listen(PORT, async () => {
   console.log(`Server running on http://localhost:${PORT}`);
   try {
     console.log('Connecting to the database in', dbUrl);
-    await sequelize.authenticate();
-    console.log('Connected to the database');
-    await Counter.sync()
-      .then(() => {
-        console.log('Counter table exists or has been created');
-      })
-      .catch((error) => {
-        console.error('Unable to create table:', error);
-      });
-
-    const count = await Counter.count();
-    if (count === 0) {
-      await Counter.create({ value: 0 });
-      console.log('Initialized counter with value 0');
+    await mongoose.connect(dbUrl)
+    const counters = await Counter.find()
+    if (counters.length === 0) {
+      await Counter.create({ value: 0 })
+      console.log('Initialized counter with value 0')
+    } else {
+      console.log('Counter already exists')
     }
+
+
   } catch (error) {
     console.error('Unable to connect to the database', error);
   }
