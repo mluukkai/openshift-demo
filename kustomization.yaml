@@ -7,3 +7,5 @@ resources:
   - manifests/service.yaml
   - manifests/imagestream.yaml
   - manifests/deployment.yaml
+  - manifests/volumeclaim.yaml
+  - manifests/mongo-deployment.yaml
