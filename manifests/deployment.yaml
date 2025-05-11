@@ -22,10 +22,7 @@ spec:
           imagePullPolicy: Always
           ports:
             - containerPort: 3000
-          env:
-            - name: DB_URL
-              valueFrom:
-                configMapKeyRef:
-                  name: demoapp-config
-                  key: DB_URL 
+          envFrom:
+            - configMapRef:
+                name: demoapp-config
               
