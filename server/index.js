@@ -1,6 +1,10 @@
 const express = require('express');
 const path = require('path');
 const { Sequelize, DataTypes, Model } = require('sequelize');
+const cors = require('cors');
+const { RedisStore } = require("connect-redis")
+const Redis = require("ioredis");
+
 
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config();
@@ -36,13 +40,19 @@ const app = express();
 const passport = require('passport')
 const session = require('express-session')
 
-const SESSION_SECRET         = process.env.SESSION_SECRET || '1234'
+const SESSION_SECRET = process.env.SESSION_SECRET
+const REDIS_HOST = process.env.REDIS_HOST
+
+const redis = new Redis({
+  host: REDIS_HOST,
+  port: 6379,
+})
 
 app.use(session({
   secret: SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: true }
+  store: new RedisStore({ client: redis }),
 }))
 
 app.use(passport.initialize())
@@ -50,13 +60,33 @@ app.use(passport.session())
 
 // ----
 
+app.use(cors());
 app.use(express.json());
+app.use(express.json());
+
 
 app.get('/api/login', passport.authenticate('oidc'))
 
 app.get('/api/login/callback', passport.authenticate('oidc', { failureRedirect: '/' }), async (req, res) => {
+  console.log('Login successful:', req.user)
   res.redirect('/')
 })
+
+app.post('/api/logout', (req, res, next) => {
+  req.logout(function(err) {
+    if (err) { return next(err); }
+    res.redirect('/');
+  });
+});
+
+app.get('/api/user', async (req, res) => {
+  console.log('User:', req.user)
+  if (req.user) {
+    res.json(req.user);
+  } else {
+    res.status(401).json({ message: 'Unauthorized' });
+  }
+});
 
 app.get('/api/ping', async (req, res) => {
   res.json({ message: 'pong' });

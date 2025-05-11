@@ -3,11 +3,23 @@ import axios from 'axios'
 
 function App() {
   const [count, setCount] = useState(null)
+  const [user, setUser] = useState(null)
 
   useEffect(() => {
     axios.get('/api/counter')
       .then(response => {
         setCount(response.data.value)
+      })
+  }, [])
+
+
+  useEffect(() => {
+    axios.get('/api/user')
+      .then(response => {
+        setUser(response.data)
+      })
+      .catch(error => {
+        console.log('not logged in')
       })
   }, [])
 
@@ -26,33 +38,31 @@ function App() {
     setCount(newCount)
     updateCounter(newCount)
   }
-
+  
   const onLogin = () => {
-    axios.get('/api/login')
-      .then(response => {
-        console.log('Login successful:', response.data)
-      })
-      .catch(error => {
-        console.error('Login failed:', error)
-      })
+    window.location.href = '/api/login'
+  }
+
+  const onLogut = async () => {
+    await axios.post('/api/logout')
+    window.location.href = '/'
   }
 
   return (
     <>
-      <h2>The Ohtucounter</h2>
+      <h2>The Ohtucounter {user && `(${user.name} is logged in)`}</h2>
       <div>Count value is now {count}</div>
       <div style={{ marginTop: 10 }}>
         <button onClick={() => setTo(count + 1)}>
           Increment
         </button>
-        <button onClick={() => setTo(0)}>
+        {user && <button onClick={() => setTo(0)}>
           Reset
-        </button>
+        </button>}
       </div>
       <div style={{ marginTop: 10 }}>
-        <button onClick={onLogin}>
-          Login
-        </button>
+        {!user && <button onClick={onLogin}>Login</button>}
+        {user && <button onClick={onLogut}>Logout</button>}
       </div>
     </>
   )
