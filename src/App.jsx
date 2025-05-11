@@ -27,16 +27,31 @@ function App() {
     updateCounter(newCount)
   }
 
+  const onLogin = () => {
+    axios.get('/api/login')
+      .then(response => {
+        console.log('Login successful:', response.data)
+      })
+      .catch(error => {
+        console.error('Login failed:', error)
+      })
+  }
+
   return (
     <>
       <h2>The Ohtucounter</h2>
-      <div>Count is now {count}</div>
+      <div>Count value is now {count}</div>
       <div style={{ marginTop: 10 }}>
         <button onClick={() => setTo(count + 1)}>
           Increment
         </button>
         <button onClick={() => setTo(0)}>
           Reset
+        </button>
+      </div>
+      <div style={{ marginTop: 10 }}>
+        <button onClick={onLogin}>
+          Login
         </button>
       </div>
     </>

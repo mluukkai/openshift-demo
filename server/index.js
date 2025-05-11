@@ -31,7 +31,32 @@ Counter.init({
 const PORT = process.env.PORT || 3000;
 const app = express();
 
+// ----
+
+const passport = require('passport')
+const session = require('express-session')
+
+const SESSION_SECRET         = process.env.SESSION_SECRET || '1234'
+
+app.use(session({
+  secret: SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  cookie: { secure: true }
+}))
+
+app.use(passport.initialize())
+app.use(passport.session())
+
+// ----
+
 app.use(express.json());
+
+app.get('/api/login', passport.authenticate('oidc'))
+
+app.get('/api/login/callback', passport.authenticate('oidc', { failureRedirect: '/' }), async (req, res) => {
+  res.redirect('/')
+})
 
 app.get('/api/ping', async (req, res) => {
   res.json({ message: 'pong' });
@@ -62,6 +87,11 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 app.listen(PORT, async () => {
+  const { setupAuthentication }  = await import('./oicd.mjs');
+
+  console.log(setupAuthentication)
+
+  await setupAuthentication()
   console.log(`Server running on http://localhost:${PORT}`);
   try {
     console.log('Connecting to the database in', dbUrl);
