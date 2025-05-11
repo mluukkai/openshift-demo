@@ -45,7 +45,7 @@ function App() {
 
   const onLogut = async () => {
     await axios.post('/api/logout')
-    window.location.href = '/'
+    setUser(null)
   }
 
   return (

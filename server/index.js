@@ -119,8 +119,6 @@ if (process.env.NODE_ENV === 'production') {
 app.listen(PORT, async () => {
   const { setupAuthentication }  = await import('./oicd.mjs');
 
-  console.log(setupAuthentication)
-
   await setupAuthentication()
   console.log(`Server running on http://localhost:${PORT}`);
   try {

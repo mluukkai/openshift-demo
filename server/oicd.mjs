@@ -6,30 +6,6 @@ const OIDC_CLIENT_ID     = process.env.OIDC_CLIENT_ID
 const OIDC_CLIENT_SECRET = process.env.OIDC_CLIENT_SECRET
 const OIDC_REDIRECT_URI  = process.env.OIDC_REDIRECT_URI
 
-const params = {
-  scope: 'openid profile email',
-  claims: {
-    id_token: {
-      uid: { essential: true },
-      hyPersonSisuId: { essential: true },
-      given_name: { essential: true },
-      family_name: { essential: true },
-      schacDateOfBirth: { essential: true },
-      email: { essential: true },
-      hyGroupCn: { essential: true },
-    },
-    userinfo: {
-      uid: { essential: true },
-      hyPersonSisuId: { essential: true },
-      given_name: { essential: true },
-      family_name: { essential: true },
-      schacDateOfBirth: { essential: true },
-      email: { essential: true },
-      hyGroupCn: { essential: true },
-    },
-  },
-}
-
 const getClient = async () => {
   const issuer = await openidClient.Issuer.discover(OIDC_ISSUER)
 
@@ -50,10 +26,11 @@ const verifyLogin = async (_tokenSet, userinfo, done) => {
     id: userinfo.sub,
     username: userinfo.uid,
     name: userinfo.name,
-    language: 'fi',
   }
 
-  done(null, { ...user})
+  // save user to db if that is required in your app
+
+  done(null, user)
 }
 
 export const setupAuthentication = async () => {
@@ -67,5 +44,23 @@ export const setupAuthentication = async () => {
     return done(null, obj)
   })
 
+  const object = {
+    cn: { essential: true },
+    name: { essential: true },
+    given_name: { essential: true },
+    hyGroupCn: { essential: true },
+    email: { essential: true },
+    family_name: { essential: true },
+    uid: { essential: true },
+  }
+  
+  const params = {
+    scope: 'openid profile email',
+    claims: {
+      id_token: object,
+      userinfo: object,
+    },
+  }
+  
   passport.use('oidc', new openidClient.Strategy({ client, params }, verifyLogin))
 }
