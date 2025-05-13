@@ -95,7 +95,7 @@ if (process.env.NODE_ENV !== 'production') {
   });
 }
 
-// ----
+// feikkikirjaantumisen koodi loppuu
 
 app.get('/api/login', passport.authenticate('oidc'))
 
