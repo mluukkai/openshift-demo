@@ -18,7 +18,7 @@ Lokaalisti, komennolla `npm start`.
 
 Parempi idea, luomalla Docker-image, ks .github/workflows/main.yaml
 
-https://demoapp-toska-playground.apps.ocp-test-0.k8s.it.helsinki.fi/ 
+https://demoapp-toska-playground.ext.ocp-test-0.k8s.it.helsinki.fi/ 
 
 mluukkai-test mluukkai
 testitesti testitesti
