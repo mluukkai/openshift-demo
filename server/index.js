@@ -64,11 +64,42 @@ app.use(cors());
 app.use(express.json());
 app.use(express.json());
 
+// jos ei olla tuotannossa, feikataan käyttäjä
+
+let loggedIn = false
+
+if (process.env.NODE_ENV !== 'production') {
+  const setMocUser = (req, res, next) => {
+    if (!loggedIn) {
+      return next()
+    }
+
+    req.user = {
+      "id": "2Q6XGZP4DNWAEYVIDZV2KLXKO3Z4QEBM",
+      "username": "mluukkai-test",
+      "name": "Matti Luukkainen"
+    }
+    next()
+  }
+  
+  app.use(setMocUser)
+
+  app.get('/api/login', (req, res) => {
+    loggedIn = true
+    res.redirect('/');
+  })
+
+  app.post('/api/logout', (req, res, next) => {
+    loggedIn = false
+    res.redirect('/');
+  });
+}
+
+// ----
 
 app.get('/api/login', passport.authenticate('oidc'))
 
 app.get('/api/login/callback', passport.authenticate('oidc', { failureRedirect: '/' }), async (req, res) => {
-  console.log('Login successful:', req.user)
   res.redirect('/')
 })
 
@@ -80,13 +111,13 @@ app.post('/api/logout', (req, res, next) => {
 });
 
 app.get('/api/user', async (req, res) => {
-  console.log('User:', req.user)
   if (req.user) {
     res.json(req.user);
   } else {
     res.status(401).json({ message: 'Unauthorized' });
   }
 });
+
 
 app.get('/api/ping', async (req, res) => {
   res.json({ message: 'pong' });
