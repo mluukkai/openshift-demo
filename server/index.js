@@ -43,8 +43,6 @@ app.get('/api/counter', async (req, res) => {
 });
 
 
-
-
 app.post('/api/counter', async (req, res) => {
   const { value } = req.body;
 
