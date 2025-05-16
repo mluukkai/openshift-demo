@@ -6,7 +6,7 @@ if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config();
 }
 
-const dbUrl = process.env.DB_URL
+const dbUrl = process.env.DB_URL === undefined ?  'postgres://demo_user:demo_password@localhost:5432/demo_db' : process.env.DB_URL;
 const sequelize = new Sequelize(dbUrl);
 
 class Counter extends Model {}
