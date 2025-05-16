@@ -43,6 +43,49 @@ app.get('/api/counter', async (req, res) => {
 });
 
 
+
+//gets the user code from the OIDC provider and exchanges it for an access token
+app.get('/api/login/callback', async (req, res) => {
+  const code = req.query.code;
+  const OIDC_SECRET = process.env.OIDC_SECRET;
+  const OIDC_CLIENT_ID = process.env.OIDC_CLIENT_ID;
+  const OIDC_REDIRECT_URI = process.env.OIDC_REDIRECT_URI;
+  
+
+  const OIDC_TOKEN_ENDPOINT = process.env.OIDC_TOKEN_ENDPOINT;
+  const usertoken = await fetch(OIDC_TOKEN_ENDPOINT, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    body: new URLSearchParams({
+      code: code,
+      client_id: OIDC_CLIENT_ID,
+      client_secret: OIDC_SECRET,
+      redirect_uri: OIDC_REDIRECT_URI,
+      grant_type: 'authorization_code'
+    })
+  });
+
+  const OIDC_USERINFO_ENDPOINT = process.env.OIDC_USERINFO_ENDPOINT;
+  const userinfo = await fetch(OIDC_USERINFO_ENDPOINT, {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${usertoken}`
+    }
+  });
+  
+  console.log('userinfo', userinfo);
+
+});
+
+
+//logs the user out
+app.get('/api/logout', async (req, res) => {
+
+});
+
+
 app.post('/api/counter', async (req, res) => {
   const { value } = req.body;
 
