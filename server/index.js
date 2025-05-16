@@ -85,7 +85,7 @@ app.get('/api/logout', async (req, res) => {
 
 });
 
-
+process.env.OIDC_REDIRECT_URI;
 
 app.post('/api/counter', async (req, res) => {
   const { value } = req.body;
