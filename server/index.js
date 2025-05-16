@@ -47,7 +47,7 @@ app.get('/api/counter', async (req, res) => {
 //gets the user code from the OIDC provider and exchanges it for an access token
 app.get('/api/login/callback', async (req, res) => {
   const code = req.query.code;
-  const OIDC_SECRET = process.env.OIDC_SECRET;
+  const OIDC_SECRET = process.env.OIDC_CLIENT_SECRET;
   const OIDC_CLIENT_ID = process.env.OIDC_CLIENT_ID;
   const OIDC_REDIRECT_URI = process.env.OIDC_REDIRECT_URI;
   
