@@ -42,6 +42,25 @@ app.get('/api/counter', async (req, res) => {
   res.json(counter);
 });
 
+//redirects to the OIDC loging page
+app.get('/api/login', async (req, res) => {
+
+});
+
+
+//gets the user code from the OIDC provider and exchanges it for an access token
+app.get('/api/login/callback', async (req, res) => {
+
+});
+
+
+//logs the user out
+app.get('/api/logout', async (req, res) => {
+
+});
+
+
+
 app.post('/api/counter', async (req, res) => {
   const { value } = req.body;
 
