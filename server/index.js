@@ -88,7 +88,7 @@ app.get('/api/login/callback', async (req, res) => {
 
     const tokenData = await tokenResponse.json();
 
-    console.log('tokenData', userttokenDataoken);
+    console.log('tokenData', tokenData);
 
     const usertoken = tokenData.access_token;
 
