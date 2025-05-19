@@ -61,7 +61,7 @@ app.get('/api/login/callback', async (req, res) => {
   const OIDC_REDIRECT_URI = process.env.OIDC_REDIRECT_URI;
   const OIDC_BASE_URL = process.env.OIDC_BASE_URL;
 
-  const OIDC_TOKEN_ENDPOINT = `${OIDC_BASE_URL }/idp/profile/oidc/token`
+  const OIDC_TOKEN_ENDPOINT = `${OIDC_BASE_URL}/idp/profile/oidc/token`
   const usertoken = await fetch(OIDC_TOKEN_ENDPOINT, {
     method: 'POST',
     headers: {
@@ -89,6 +89,16 @@ app.get('/api/login/callback', async (req, res) => {
   
   console.log('userinfo', userinfo);
 
+});
+
+app.get('/api/login', async (req, res) => {
+  const OIDC_BASE_URL = process.env.OIDC_BASE_URL;
+  const OIDC_CLIENT_ID = process.env.OIDC_CLIENT_ID;
+  const OIDC_REDIRECT_URI = process.env.OIDC_REDIRECT_URI;
+
+  const authorizeUrl = `${OIDC_BASE_URL}/idp/profile/oidc/authorize?response_type=code&client_id=${encodeURIComponent(OIDC_CLIENT_ID)}&redirect_uri=${encodeURIComponent(OIDC_REDIRECT_URI)}&scope=openid`;
+
+  res.redirect(authorizeUrl);
 });
 
 app.get('/api/logout', async (req, res) => {
