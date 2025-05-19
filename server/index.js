@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 const express = require('express');
 const path = require('path');
 const { Sequelize, DataTypes, Model } = require('sequelize');
@@ -51,6 +52,47 @@ app.post('/api/counter', async (req, res) => {
 
   res.json({ value: counter });
 })
+
+//gets the user code from the OIDC provider and exchanges it for an access token
+app.get('/api/login/callback', async (req, res) => {
+  const code = req.query.code;
+  const OIDC_SECRET = process.env.OIDC_SECRET;
+  const OIDC_CLIENT_ID = process.env.OIDC_CLIENT_ID;
+  const OIDC_REDIRECT_URI = process.env.OIDC_REDIRECT_URI;
+  const OIDC_BASE_URL = process.env.OIDC_BASE_URL;
+
+  const OIDC_TOKEN_ENDPOINT = `${OIDC_BASE_URL }/idp/profile/oidc/token`
+  const usertoken = await fetch(OIDC_TOKEN_ENDPOINT, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    body: new URLSearchParams({
+      code: code,
+      client_id: OIDC_CLIENT_ID,
+      client_secret: OIDC_SECRET,
+      redirect_uri: OIDC_REDIRECT_URI,
+      grant_type: 'authorization_code'
+    })
+  });
+
+  const OIDC_USERINFO_ENDPOINT = `${OIDC_BASE_URL }/idp/userinfo`
+
+  const userinfo = await fetch(OIDC_USERINFO_ENDPOINT, {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${usertoken}`
+    }
+  });
+  
+  console.log('userinfo', userinfo);
+
+});
+
+app.get('/api/logout', async (req, res) => {
+  res.redirect('/')
+});
+
 
 // jos ollaan tuotannossa, tarjotaan dist-hakemistoon käännetty frontend sovelluksen juuriosoiteessa
 if (process.env.NODE_ENV === 'production') {
