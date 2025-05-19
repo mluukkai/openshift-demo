@@ -62,32 +62,50 @@ app.get('/api/login/callback', async (req, res) => {
   const OIDC_BASE_URL = process.env.OIDC_BASE_URL;
 
   const OIDC_TOKEN_ENDPOINT = `${OIDC_BASE_URL}/idp/profile/oidc/token`
-  const usertoken = await fetch(OIDC_TOKEN_ENDPOINT, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded'
-    },
-    body: new URLSearchParams({
+
+  console.log('/api/login/callback')
+
+  console.log('code', code);
+
+  try {  
+
+    const body = new URLSearchParams({
       code: code,
       client_id: OIDC_CLIENT_ID,
       client_secret: OIDC_SECRET,
       redirect_uri: OIDC_REDIRECT_URI,
       grant_type: 'authorization_code'
-    })
-  });
+    });
+    console.log('body', body.toString());
 
-  console.log('usertoken', usertoken);
+    const tokenResponse = await fetch(OIDC_TOKEN_ENDPOINT, {
+      method: 'POST',
+      headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: body.toString()
+    });
 
-  const OIDC_USERINFO_ENDPOINT = `${OIDC_BASE_URL}/idp/userinfo`
+    const tokenData = await tokenResponse.json();
+    const usertoken = tokenData.access_token;
 
-  const userinfo = await fetch(OIDC_USERINFO_ENDPOINT, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${usertoken}`
-    }
-  });
+    console.log('usertoken', usertoken);
+
+    const OIDC_USERINFO_ENDPOINT = `${OIDC_BASE_URL}/idp/userinfo`
+
+    const userinfo = await fetch(OIDC_USERINFO_ENDPOINT, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${usertoken}`
+      }
+    });
   
-  console.log('userinfo', userinfo);
+    console.log('userinfo', userinfo);
+  } catch (e) {
+    console.log(e)
+  }
+
+
 
 });
 
@@ -96,9 +114,11 @@ app.get('/api/login', async (req, res) => {
   const OIDC_CLIENT_ID = process.env.OIDC_CLIENT_ID;
   const OIDC_REDIRECT_URI = process.env.OIDC_REDIRECT_URI;
 
+  console.log('/api/login')
+
   const authorizeUrl = `${OIDC_BASE_URL}/idp/profile/oidc/authorize?response_type=code&client_id=${encodeURIComponent(OIDC_CLIENT_ID)}&redirect_uri=${encodeURIComponent(OIDC_REDIRECT_URI)}&scope=openid`;
 
-  console.log('authorizeUrl', authorizeUrl);
+  console.log('redirecting to', authorizeUrl);
 
   res.redirect(authorizeUrl);
 });
