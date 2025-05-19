@@ -78,7 +78,7 @@ app.get('/api/login/callback', async (req, res) => {
 
   console.log('usertoken', usertoken);
 
-  const OIDC_USERINFO_ENDPOINT = `${OIDC_BASE_URL }/idp/userinfo`
+  const OIDC_USERINFO_ENDPOINT = `${OIDC_BASE_URL}/idp/userinfo`
 
   const userinfo = await fetch(OIDC_USERINFO_ENDPOINT, {
     method: 'GET',
