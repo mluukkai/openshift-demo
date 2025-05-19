@@ -53,7 +53,7 @@ app.post('/api/counter', async (req, res) => {
   res.json({ value: counter });
 })
 
-//gets the user code from the OIDC provider and exchanges it for an access token
+// gets the user code from the OIDC provider and exchanges it for an access token
 app.get('/api/login/callback', async (req, res) => {
   const code = req.query.code;
   const OIDC_SECRET = process.env.OIDC_SECRET;
@@ -95,6 +95,13 @@ app.get('/api/logout', async (req, res) => {
   res.redirect('/')
 });
 
+app.get('/api/user', async (req, res) => {
+  if (req.user) {
+    res.json(req.user);
+  } else {
+    res.status(401).json({ message: 'Unauthorized' });
+  }
+});
 
 // jos ollaan tuotannossa, tarjotaan dist-hakemistoon käännetty frontend sovelluksen juuriosoiteessa
 if (process.env.NODE_ENV === 'production') {
