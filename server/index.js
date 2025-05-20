@@ -114,6 +114,7 @@ app.get('/api/login/callback', async (req, res) => {
   });
   
   console.log('userinfo', userinfo);
+  res.json(userinfo);
 
 
     /*
