@@ -56,12 +56,7 @@ app.post('/api/counter', async (req, res) => {
 
 // gets the user code from the OIDC provider and exchanges it for an access token
 app.get('/api/login/callback', async (req, res) => {
-  const code = req.query.code;
  
-  console.log('----------')
-  console.log('/api/login/callback')
-
-
   //gets the user code from the OIDC provider and exchanges it for an access token
   const OIDC_SECRET = process.env.OIDC_CLIENT_SECRET;
   const OIDC_CLIENT_ID = process.env.OIDC_CLIENT_ID;
@@ -70,9 +65,6 @@ app.get('/api/login/callback', async (req, res) => {
   // It is required in the token request due to security reasons read: https://stackoverflow.com/questions/29653421/why-does-oauth-rfc-require-the-redirect-uri-to-be-passed-again-to-exchange-code
   const OIDC_REDIRECT_URI = process.env.OIDC_REDIRECT_URI;
 
-
-  console.log('===========');
-
   // The values for the token endpoint and userinfo endpoint are from https:///login-test.it.helsinki.fi/.well-known/openid-configuration
   // They could also be fetched during runtime, but in this demo they are defined in the environment variables.
   // Token endpoint gives an access token and needs the client id, secret and user code for authentication
@@ -80,7 +72,7 @@ app.get('/api/login/callback', async (req, res) => {
   const OIDC_TOKEN_ENDPOINT = `${process.env.OIDC_BASE_URL}/idp/profile/oidc/token`;
   const result = await axios.post(OIDC_TOKEN_ENDPOINT, 
     new URLSearchParams({
-      code: code,
+      code: req.query.code, // the user code received from the OIDC provider
       client_id: OIDC_CLIENT_ID,
       client_secret: OIDC_SECRET,
       redirect_uri: OIDC_REDIRECT_URI,
@@ -92,9 +84,6 @@ app.get('/api/login/callback', async (req, res) => {
     }
   }
   );
-
-  console.log('result.data', result.data);
-  console.log('result.data.access_token', result.data.access_token);
 
   const access_token = result.data.access_token;
 
@@ -114,12 +103,10 @@ app.get('/api/login', async (req, res) => {
   const OIDC_CLIENT_ID = process.env.OIDC_CLIENT_ID;
   const OIDC_REDIRECT_URI = process.env.OIDC_REDIRECT_URI;
 
-  console.log('/api/login')
-
-  // Use the scopes defined in your configuration
+  // Using the scopes defined in configuration
   const scopes = ['openid', 'email', 'offline_access', 'profile'];
 
-  // Use the claims parameter as defined in your configuration
+  // Using the claims parameter defined in configuration
   const claims = {
     id_token: {
       cn: null,
