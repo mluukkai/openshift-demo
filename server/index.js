@@ -82,7 +82,7 @@ app.get('/api/login/callback', async (req, res) => {
 
     console.log('body', body);
 
-    const tokenResponse = await fetch(OIDC_TOKEN_ENDPOINT, {
+    const tokenResponse = await fetch('https://login-test.it.helsinki.fi/idp/profile/oidc/token', {
       method: 'POST',
       headers: {
       'Content-Type': 'application/x-www-form-urlencoded'
