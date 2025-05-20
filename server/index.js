@@ -57,19 +57,56 @@ app.post('/api/counter', async (req, res) => {
 // gets the user code from the OIDC provider and exchanges it for an access token
 app.get('/api/login/callback', async (req, res) => {
   const code = req.query.code;
-  const OIDC_SECRET = process.env.OIDC_CLIENT_SECRET;
-  const OIDC_CLIENT_ID = process.env.OIDC_CLIENT_ID;
-  const OIDC_REDIRECT_URI = process.env.OIDC_REDIRECT_URI;
-  const OIDC_BASE_URL = process.env.OIDC_BASE_URL;
-
-  const OIDC_TOKEN_ENDPOINT = `${OIDC_BASE_URL}/idp/profile/oidc/token`
-
+ 
   console.log('----------')
   console.log('/api/login/callback')
 
   console.log('code', code);
 
   try {  
+    //gets the user code from the OIDC provider and exchanges it for an access token
+
+  const OIDC_SECRET = process.env.OIDC_CLIENT_SECRET;
+  const OIDC_CLIENT_ID = process.env.OIDC_CLIENT_ID;
+
+  // the redirect uri is the same as the one used in the login request
+  // It is required in the token request due to security reasons read: https://stackoverflow.com/questions/29653421/why-does-oauth-rfc-require-the-redirect-uri-to-be-passed-again-to-exchange-code
+  const OIDC_REDIRECT_URI = process.env.OIDC_REDIRECT_URI;
+
+  
+  // The values for the token endpoint and userinfo endpoint are from https://login.helsinki.fi/.well-known/openid-configuration
+  // They could also be fetched during runtime, but in this demo they are defined in the environment variables.
+  // Token endpoint gives an access token and needs the client id, secret and user code for authentication
+  const OIDC_TOKEN_ENDPOINT = process.env.OIDC_TOKEN_ENDPOINT; 
+  const usertoken = await fetch('https://login-test.it.helsinki.fi/idp/profile/oidc/token', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    body: new URLSearchParams({
+      code: code,
+      client_id: OIDC_CLIENT_ID,
+      client_secret: OIDC_SECRET,
+      redirect_uri: OIDC_REDIRECT_URI,
+      grant_type: 'authorization_code'
+    })
+  });
+
+  console.log('usertoken', usertoken);
+
+  //Userinfo endpoint gives the user information and needs an user token for authentication  
+  const OIDC_USERINFO_ENDPOINT = process.env.OIDC_USERINFO_ENDPOINT; 
+  const userinfo = await fetch('https://login-test.it.helsinki.fi/idp/profile/oidc/userinfo', {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${usertoken}`
+    }
+  });
+  
+  console.log('userinfo', userinfo);
+
+
+    /*
     console.log('----------')
 
     const body = new URLSearchParams({
