@@ -3,6 +3,7 @@ const express = require('express');
 const path = require('path');
 const { Sequelize, DataTypes, Model } = require('sequelize');
 const axios = require('axios');
+const session = require('express-session');
 
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config();
@@ -35,24 +36,70 @@ const app = express();
 
 app.use(express.json());
 
-app.get('/api/ping', async (req, res) => {
-  res.json({ message: 'pong' });
+// session for remembering the user
+
+app.use(session({
+  secret: 'your-secret-key',
+  resave: false,
+  saveUninitialized: process.env.NODE_ENV !== 'production',
+  cookie: { secure: false } 
+}));
+
+// middleware to set the user in the request object if it exists in the session
+
+app.use((req, res, next) => {
+  req.user = req.session.user || null;
+  next()
 });
 
-app.get('/api/counter', async (req, res) => {
-  const counter = await Counter.findOne();
-  res.json(counter);
+app.get('/api/user', async (req, res) => {
+  if (req.user) {
+    res.json(req.user);
+  } else {
+    res.status(401).json({ message: 'Unauthorized' });
+  }
 });
 
-app.post('/api/counter', async (req, res) => {
-  const { value } = req.body;
+app.post('/api/logout', (req, res) => {
+  req.session.user = null;
+  res.redirect('/');
+});
 
-  const counter = await Counter.findOne();
-  counter.value = value;
-  await counter.save();
+app.get('/api/login', async (req, res) => {
+  const OIDC_BASE_URL = process.env.OIDC_BASE_URL;
+  const OIDC_CLIENT_ID = process.env.OIDC_CLIENT_ID;
+  const OIDC_REDIRECT_URI = process.env.OIDC_REDIRECT_URI;
 
-  res.json({ value: counter });
-})
+  // Using the scopes defined in configuration
+  const scopes = ['openid', 'email', 'offline_access', 'profile'];
+
+  // Using the claims parameter defined in configuration
+  const claims = {
+    id_token: {
+      cn: null,
+      email: null,
+      family_name: null,
+      given_name: null,
+      hyGroupCn: null,
+      name: null,
+      uid: null
+    },
+    userinfo: {
+      cn: null,
+      email: null,
+      family_name: null,
+      given_name: null,
+      hyGroupCn: null,
+      name: null,
+      uid: null
+    }
+  };
+
+  const authorizeUrl = `${OIDC_BASE_URL}/idp/profile/oidc/authorize?response_type=code&client_id=${encodeURIComponent(OIDC_CLIENT_ID)}&redirect_uri=${encodeURIComponent(OIDC_REDIRECT_URI)}&scope=${encodeURIComponent(scopes.join(' '))}&claims=${encodeURIComponent(JSON.stringify(claims))}`;
+
+  res.redirect(authorizeUrl);
+});
+
 
 // gets the user code from the OIDC provider and exchanges it for an access token
 app.get('/api/login/callback', async (req, res) => {
@@ -95,55 +142,29 @@ app.get('/api/login/callback', async (req, res) => {
     }
   });
   
-  res.json(userinfo_request.data);
+  req.session.user = userinfo_request.data;
+
+  res.redirect('/');
 });
 
-app.get('/api/login', async (req, res) => {
-  const OIDC_BASE_URL = process.env.OIDC_BASE_URL;
-  const OIDC_CLIENT_ID = process.env.OIDC_CLIENT_ID;
-  const OIDC_REDIRECT_URI = process.env.OIDC_REDIRECT_URI;
-
-  // Using the scopes defined in configuration
-  const scopes = ['openid', 'email', 'offline_access', 'profile'];
-
-  // Using the claims parameter defined in configuration
-  const claims = {
-    id_token: {
-      cn: null,
-      email: null,
-      family_name: null,
-      given_name: null,
-      hyGroupCn: null,
-      name: null,
-      uid: null
-    },
-    userinfo: {
-      cn: null,
-      email: null,
-      family_name: null,
-      given_name: null,
-      hyGroupCn: null,
-      name: null,
-      uid: null
-    }
-  };
-
-  const authorizeUrl = `${OIDC_BASE_URL}/idp/profile/oidc/authorize?response_type=code&client_id=${encodeURIComponent(OIDC_CLIENT_ID)}&redirect_uri=${encodeURIComponent(OIDC_REDIRECT_URI)}&scope=${encodeURIComponent(scopes.join(' '))}&claims=${encodeURIComponent(JSON.stringify(claims))}`;
-
-  res.redirect(authorizeUrl);
+app.get('/api/ping', async (req, res) => {
+  res.json({ message: 'pong' });
 });
 
-app.get('/api/logout', async (req, res) => {
-  res.redirect('/')
+app.get('/api/counter', async (req, res) => {
+  const counter = await Counter.findOne();
+  res.json(counter);
 });
 
-app.get('/api/user', async (req, res) => {
-  if (req.user) {
-    res.json(req.user);
-  } else {
-    res.status(401).json({ message: 'Unauthorized' });
-  }
-});
+app.post('/api/counter', async (req, res) => {
+  const { value } = req.body;
+
+  const counter = await Counter.findOne();
+  counter.value = value;
+  await counter.save();
+
+  res.json({ value: counter });
+})
 
 // jos ollaan tuotannossa, tarjotaan dist-hakemistoon käännetty frontend sovelluksen juuriosoiteessa
 if (process.env.NODE_ENV === 'production') {
