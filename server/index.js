@@ -2,6 +2,7 @@
 const express = require('express');
 const path = require('path');
 const { Sequelize, DataTypes, Model } = require('sequelize');
+const axios = require('axios');
 
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config();
@@ -69,6 +70,7 @@ app.get('/api/login/callback', async (req, res) => {
 
   try {  
 
+    /*
     const body = new URLSearchParams({
       code: code,
       client_id: OIDC_CLIENT_ID,
@@ -78,7 +80,7 @@ app.get('/api/login/callback', async (req, res) => {
     });
 
     console.log('body', body);
-/*
+
     const tokenResponse = await fetch(OIDC_TOKEN_ENDPOINT, {
       method: 'POST',
       headers: {
@@ -91,7 +93,7 @@ app.get('/api/login/callback', async (req, res) => {
 
 
     console.log('tokenData', tokenData);
-*/
+*/                               
     const result = await axios.post(`https://login-test.it.helsinki.fi/idp/profile/oidc/token`, {
         grant_type: 'authorization_code',   
         code: code,
@@ -100,7 +102,9 @@ app.get('/api/login/callback', async (req, res) => {
         redirect_uri:OIDC_REDIRECT_URI  
       },
       {
-        headers:{'Content-Type': 'application/x-www-form-urlencoded'}
+        headers:{ 
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
       }
     )
     console.log(result)
