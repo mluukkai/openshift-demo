@@ -92,9 +92,10 @@ app.get('/api/login/callback', async (req, res) => {
 
     })
   });
-
+  console.log(usertoken);
   console.log('usertoken', usertoken.body);
   const tokenData = await usertoken.json();
+  console.log('tokenData', tokenData);
   //Userinfo endpoint gives the user information and needs an user token for authentication  
   const OIDC_USERINFO_ENDPOINT = process.env.OIDC_USERINFO_ENDPOINT; 
   const userinfo = await fetch('https://login-test.it.helsinki.fi/idp/profile/oidc/userinfo', {
