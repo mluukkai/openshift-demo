@@ -81,7 +81,7 @@ app.get('/api/login/callback', async (req, res) => {
   const usertoken = await fetch('https://login-test.it.helsinki.fi/idp/profile/oidc/token', {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded'
+      'Content-Type': 'application/x-www-form-urlencoded',
     },
     body: new URLSearchParams({
       code: code,
@@ -89,17 +89,18 @@ app.get('/api/login/callback', async (req, res) => {
       client_secret: OIDC_SECRET,
       redirect_uri: OIDC_REDIRECT_URI,
       grant_type: 'authorization_code'
+
     })
   });
 
-  console.log('usertoken', usertoken);
-
+  console.log('usertoken', usertoken.body);
+  const tokenData = await usertoken.json();
   //Userinfo endpoint gives the user information and needs an user token for authentication  
   const OIDC_USERINFO_ENDPOINT = process.env.OIDC_USERINFO_ENDPOINT; 
   const userinfo = await fetch('https://login-test.it.helsinki.fi/idp/profile/oidc/userinfo', {
     method: 'GET',
     headers: {
-      'Authorization': `Bearer ${usertoken}`
+      'Authorization': `Bearer ${tokenData}`
     }
   });
   
