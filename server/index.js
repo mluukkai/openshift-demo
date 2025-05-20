@@ -112,9 +112,13 @@ app.get('/api/login/callback', async (req, res) => {
       'Authorization': `Bearer ${access_token}`
     }
   });
+
+  const userinfoData = await userinfo.json();
+  console.log('userinfoData', userinfoData);
+
   
   console.log('userinfo', userinfo);
-  res.json(userinfo);
+  res.json(userinfoData);
 
 
     /*
