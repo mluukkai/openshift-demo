@@ -64,12 +64,13 @@ app.get('/api/login/callback', async (req, res) => {
 
   const OIDC_TOKEN_ENDPOINT = `${OIDC_BASE_URL}/idp/profile/oidc/token`
 
+  console.log('----------')
   console.log('/api/login/callback')
 
   console.log('code', code);
 
   try {  
-
+    console.log('----------')
 
     const body = new URLSearchParams({
       code: code,
@@ -77,11 +78,9 @@ app.get('/api/login/callback', async (req, res) => {
       client_secret: OIDC_SECRET,
       redirect_uri: OIDC_REDIRECT_URI,
       grant_type: 'authorization_code'
-    });
+    }).toString();
 
     console.log('body', body);
-
-    console.log('----------')
 
     const tokenResponse = await fetch(OIDC_TOKEN_ENDPOINT, {
       method: 'POST',
@@ -95,11 +94,13 @@ app.get('/api/login/callback', async (req, res) => {
 
     console.log('tokenResponse', tokenResponse);
 
-        /*    
+    console.log('----------')
+   
     const tokenData = await tokenResponse.json();
 
     console.log('tokenData', tokenData);
-                          
+    
+    /*                  
     const result = await axios.post(`https://login-test.it.helsinki.fi/idp/profile/oidc/token`, {
         grant_type: 'authorization_code',   
         code: code,
