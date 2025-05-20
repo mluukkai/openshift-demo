@@ -61,11 +61,8 @@ app.get('/api/login/callback', async (req, res) => {
   console.log('----------')
   console.log('/api/login/callback')
 
-  console.log('code', code);
 
-  try {  
-    //gets the user code from the OIDC provider and exchanges it for an access token
-
+  //gets the user code from the OIDC provider and exchanges it for an access token
   const OIDC_SECRET = process.env.OIDC_CLIENT_SECRET;
   const OIDC_CLIENT_ID = process.env.OIDC_CLIENT_ID;
 
@@ -73,121 +70,43 @@ app.get('/api/login/callback', async (req, res) => {
   // It is required in the token request due to security reasons read: https://stackoverflow.com/questions/29653421/why-does-oauth-rfc-require-the-redirect-uri-to-be-passed-again-to-exchange-code
   const OIDC_REDIRECT_URI = process.env.OIDC_REDIRECT_URI;
 
-  
-  // The values for the token endpoint and userinfo endpoint are from https://login.helsinki.fi/.well-known/openid-configuration
+
+  console.log('===========');
+
+  // The values for the token endpoint and userinfo endpoint are from https:///login-test.it.helsinki.fi/.well-known/openid-configuration
   // They could also be fetched during runtime, but in this demo they are defined in the environment variables.
   // Token endpoint gives an access token and needs the client id, secret and user code for authentication
-  const OIDC_TOKEN_ENDPOINT = process.env.OIDC_TOKEN_ENDPOINT; 
-  const usertoken = await fetch('https://login-test.it.helsinki.fi/idp/profile/oidc/token', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    body: new URLSearchParams({
+
+  const OIDC_TOKEN_ENDPOINT = `${process.env.OIDC_BASE_URL}/idp/profile/oidc/token`;
+  const result = await axios.post(OIDC_TOKEN_ENDPOINT, 
+    new URLSearchParams({
       code: code,
       client_id: OIDC_CLIENT_ID,
       client_secret: OIDC_SECRET,
       redirect_uri: OIDC_REDIRECT_URI,
       grant_type: 'authorization_code'
+    }).toString(),
+    {
+    headers: { 
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
+  }
+  );
 
-    })
-  });
-  console.log(usertoken);
-  console.log('usertoken', usertoken.body);
-  
-  const tokenData = await usertoken.json();
-  console.log('tokenData', tokenData);
-  
-  const access_token = tokenData.access_token;
-  console.log('access_token', access_token);
-  
-  const id_token = tokenData.id_token;
-  console.log('id_token', id_token);
+  console.log('result.data', result.data);
+  console.log('result.data.access_token', result.data.access_token);
 
-  //Userinfo endpoint gives the user information and needs an user token for authentication  
-  const OIDC_USERINFO_ENDPOINT = process.env.OIDC_USERINFO_ENDPOINT; 
-  const userinfo = await fetch('https://login-test.it.helsinki.fi/idp/profile/oidc/userinfo', {
-    method: 'GET',
+  const access_token = result.data.access_token;
+
+  // Userinfo endpoint gives the user information and needs an user token for authentication  
+  const OIDC_USERINFO_ENDPOINT = `${process.env.OIDC_BASE_URL}/idp/profile/oidc/userinfo`;
+  const userinfo_request = await axios.get(OIDC_USERINFO_ENDPOINT, {
     headers: {
-      'Authorization': `Bearer ${access_token}`
+    'Authorization': `Bearer ${access_token}`
     }
   });
-
-  const userinfoData = await userinfo.json();
-  console.log('userinfoData', userinfoData);
-
   
-  console.log('userinfo', userinfo);
-  res.json(userinfoData);
-
-
-    /*
-    console.log('----------')
-
-    const body = new URLSearchParams({
-      code: code,
-      client_id: OIDC_CLIENT_ID,
-      client_secret: OIDC_SECRET,
-      redirect_uri: OIDC_REDIRECT_URI,
-      grant_type: 'authorization_code'
-    }).toString();
-
-    console.log('body', body);
-
-    const tokenResponse = await fetch('https://login-test.it.helsinki.fi/idp/profile/oidc/token', {
-      method: 'POST',
-      headers: {
-      'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      body: body
-    });
-
-    console.log('----------')
-
-    console.log('tokenResponse', tokenResponse);
-
-    console.log('----------')
-   
-    const tokenData = await tokenResponse.json();
-
-    console.log('tokenData', tokenData);
-    
-    /*                  
-    const result = await axios.post(`https://login-test.it.helsinki.fi/idp/profile/oidc/token`, {
-        grant_type: 'authorization_code',   
-        code: code,
-        client_id: OIDC_CLIENT_ID,
-        client_secret: OIDC_SECRET,
-        redirect_uri:OIDC_REDIRECT_URI  
-      },
-      {
-        headers:{ 
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }
-    )
-    console.log(result)
-
-    const usertoken = tokenData.access_token;
-
-    console.log('usertoken', usertoken);
-    /*
-    const OIDC_USERINFO_ENDPOINT = `${OIDC_BASE_URL}/idp/userinfo`
-
-    const userinfo = await fetch(OIDC_USERINFO_ENDPOINT, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${usertoken}`
-      }
-    });
-  
-    console.log('userinfo', userinfo);
-    */
-  } catch (e) {
-    console.log('----------')
-    console.log(e)
-  }
-
+  res.json(userinfo_request.data);
 });
 
 app.get('/api/login', async (req, res) => {
@@ -197,9 +116,32 @@ app.get('/api/login', async (req, res) => {
 
   console.log('/api/login')
 
-  const authorizeUrl = `https://login-test.it.helsinki.fi/idp/profile/oidc/authorize?response_type=code&client_id=${encodeURIComponent(OIDC_CLIENT_ID)}&redirect_uri=${encodeURIComponent(OIDC_REDIRECT_URI)}&scope=openid%20profile%20uid%20name`;
+  // Use the scopes defined in your configuration
+  const scopes = ['openid', 'email', 'offline_access', 'profile'];
 
-  console.log('redirecting to', authorizeUrl);
+  // Use the claims parameter as defined in your configuration
+  const claims = {
+    id_token: {
+      cn: null,
+      email: null,
+      family_name: null,
+      given_name: null,
+      hyGroupCn: null,
+      name: null,
+      uid: null
+    },
+    userinfo: {
+      cn: null,
+      email: null,
+      family_name: null,
+      given_name: null,
+      hyGroupCn: null,
+      name: null,
+      uid: null
+    }
+  };
+
+  const authorizeUrl = `${OIDC_BASE_URL}/idp/profile/oidc/authorize?response_type=code&client_id=${encodeURIComponent(OIDC_CLIENT_ID)}&redirect_uri=${encodeURIComponent(OIDC_REDIRECT_URI)}&scope=${encodeURIComponent(scopes.join(' '))}&claims=${encodeURIComponent(JSON.stringify(claims))}`;
 
   res.redirect(authorizeUrl);
 });
