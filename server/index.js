@@ -182,7 +182,7 @@ app.get('/api/login', async (req, res) => {
 
   console.log('/api/login')
 
-  const authorizeUrl = `${OIDC_BASE_URL}/idp/profile/oidc/authorize?response_type=code&client_id=${encodeURIComponent(OIDC_CLIENT_ID)}&redirect_uri=${encodeURIComponent(OIDC_REDIRECT_URI)}&scope=email`;
+  const authorizeUrl = `${OIDC_BASE_URL}/idp/profile/oidc/authorize?response_type=code&client_id=${encodeURIComponent(OIDC_CLIENT_ID)}&redirect_uri=${encodeURIComponent(OIDC_REDIRECT_URI)}&scope=openid%20profile%20uid%20name`;
 
   console.log('redirecting to', authorizeUrl);
 
