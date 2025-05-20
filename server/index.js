@@ -76,14 +76,15 @@ app.get('/api/login/callback', async (req, res) => {
       redirect_uri: OIDC_REDIRECT_URI,
       grant_type: 'authorization_code'
     });
-    console.log('body', body.toString());
+
+    console.log('body', body);
 
     const tokenResponse = await fetch(OIDC_TOKEN_ENDPOINT, {
       method: 'POST',
       headers: {
       'Content-Type': 'application/x-www-form-urlencoded'
       },
-      body: body.toString()
+      body: body
     });
 
     const tokenData = await tokenResponse.json();
@@ -93,7 +94,7 @@ app.get('/api/login/callback', async (req, res) => {
     const usertoken = tokenData.access_token;
 
     console.log('usertoken', usertoken);
-
+    /*
     const OIDC_USERINFO_ENDPOINT = `${OIDC_BASE_URL}/idp/userinfo`
 
     const userinfo = await fetch(OIDC_USERINFO_ENDPOINT, {
@@ -104,7 +105,9 @@ app.get('/api/login/callback', async (req, res) => {
     });
   
     console.log('userinfo', userinfo);
+    */
   } catch (e) {
+    console.log('----------')
     console.log(e)
   }
 
