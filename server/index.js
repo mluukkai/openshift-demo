@@ -184,16 +184,16 @@ const exchangeCodeClientSecretPost = async (endpoint, code, client_id, client_se
 
 const exchangeCodeClientSecretBasic= async (endpoint, code, client_id, client_secret, redirect_uri) => {
   const authHeader = Buffer.from(`${client_id}:${client_secret}`).toString('base64');
-  const request = await axios.post(endpoint, {
-      headers: {
+  const request = await axios.post(endpoint,
+    new URLSearchParams({
+      code: code,
+      redirect_uri: redirect_uri,
+      grant_type: 'authorization_code'
+    }).toString(),  
+    {headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': `Basic ${authHeader}`
+        'Authorization': `BASIC ${authHeader}`
       },
-      body: {
-        code: code,
-        redirect_uri: redirect_uri,
-        grant_type: 'authorization_code'
-      }
   })
   
   const access_token = request.data.access_token;
