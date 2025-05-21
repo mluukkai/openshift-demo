@@ -188,7 +188,7 @@ const exchangeCodeClientSecretBasic= async (endpoint, code, client_id, client_se
   console.log('client_id', client_id);
 
 
-  const authHeader = Buffer.from(`${client_id}:${client_secret}`).toString('base64');
+  const authHeader = Buffer.from(`${encodeURIComponent(client_id)}:${encodeURIComponent(client_secret)}`).toString('base64');
   const request = await axios.post('https://login-test.it.helsinki.fi/idp/profile/oidc/authorize',
     new URLSearchParams({
       code: code,
