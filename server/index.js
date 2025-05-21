@@ -117,22 +117,9 @@ app.get('/api/login/callback', async (req, res) => {
   // Token endpoint gives an access token and needs the client id, secret and user code for authentication
 
   const OIDC_TOKEN_ENDPOINT = `${process.env.OIDC_BASE_URL}/idp/profile/oidc/token`;
-  const result = await axios.post(OIDC_TOKEN_ENDPOINT, 
-    new URLSearchParams({
-      code: req.query.code, // the user code received from the OIDC provider
-      client_id: OIDC_CLIENT_ID,
-      client_secret: OIDC_SECRET,
-      redirect_uri: OIDC_REDIRECT_URI,
-      grant_type: 'authorization_code'
-    }).toString(),
-    {
-    headers: { 
-      'Content-Type': 'application/x-www-form-urlencoded'
-    }
-  }
-  );
+  const tokens = await exchangeCodeClientSecretBasic(OIDC_TOKEN_ENDPOINT, req.query.code, OIDC_CLIENT_ID, OIDC_SECRET, OIDC_REDIRECT_URI);
 
-  const access_token = result.data.access_token;
+  const access_token = tokens.access_token;
 
   // Userinfo endpoint gives the user information and needs an user token for authentication  
   const OIDC_USERINFO_ENDPOINT = `${process.env.OIDC_BASE_URL}/idp/profile/oidc/userinfo`;
@@ -165,6 +152,87 @@ app.post('/api/counter', async (req, res) => {
 
   res.json({ value: counter });
 })
+
+
+
+const exchangeCodeClientSecretPost = async (endpoint, code, client_id, client_secret, redirect_uri) => {
+  const request = await axios.post(endpoint, 
+    new URLSearchParams({
+      code: code, // the user code received from the OIDC provider
+      client_id: client_id,
+      client_secret: client_secret,
+      redirect_uri: redirect_uri,
+      grant_type: 'authorization_code'
+    }).toString(),
+    {
+    headers: { 
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
+  }
+  );
+  const access_token = request.data.access_token;
+  const id_token = request.data.id_token;
+  
+
+  return {
+    access_token,
+    id_token
+  }
+}
+
+
+
+const exchangeCodeClientSecretBasic= async (endpoint, code, client_id, client_secret, redirect_uri) => {
+  const authHeader = Buffer.from(`${client_id}:${client_secret}`).toString('base64');
+  const request = await axios.post(endpoint, {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': `Basic ${authHeader}`
+      },
+      body: {
+        code: code,
+        redirect_uri: redirect_uri,
+        grant_type: 'authorization_code'
+      }
+  })
+  
+  const access_token = request.data.access_token;
+  const id_token = request.data.id_token;
+  
+  return {
+    access_token,
+    id_token
+  }
+}
+
+
+
+
+app.get('/api/login', async (req, res) => {
+  const OIDC_BASE_URL = process.env.OIDC_BASE_URL;
+  const OIDC_CLIENT_ID = process.env.OIDC_CLIENT_ID;
+  const OIDC_REDIRECT_URI = process.env.OIDC_REDIRECT_URI;
+
+  console.log('/api/login')
+
+  const authorizeUrl = `https://login-test.it.helsinki.fi/idp/profile/oidc/authorize?response_type=code&client_id=${encodeURIComponent(OIDC_CLIENT_ID)}&redirect_uri=${encodeURIComponent(OIDC_REDIRECT_URI)}&scope=openid%20profile%20uid%20name`;
+
+  console.log('redirecting to', authorizeUrl);
+
+  res.redirect(authorizeUrl);
+});
+
+app.get('/api/logout', async (req, res) => {
+  res.redirect('/')
+});
+
+app.get('/api/user', async (req, res) => {
+  if (req.user) {
+    res.json(req.user);
+  } else {
+    res.status(401).json({ message: 'Unauthorized' });
+  }
+});
 
 // jos ollaan tuotannossa, tarjotaan dist-hakemistoon käännetty frontend sovelluksen juuriosoiteessa
 if (process.env.NODE_ENV === 'production') {
