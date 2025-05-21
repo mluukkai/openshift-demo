@@ -182,12 +182,23 @@ const exchangeCodeClientSecretPost = async (endpoint, code, client_id, client_se
 
 
 
+<<<<<<< HEAD
 const exchangeCodeClientSecretBasic= async (endpoint, code, client_id, client_secret, redirect_uri) => {
   const authHeader = Buffer.from(`${client_id}:${client_secret}`).toString('base64');
   const request = await axios.post(endpoint, {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
         'Authorization': `Basic ${authHeader}`
+=======
+const exchangeCodeClientSecretBasic= async (code) => {
+  
+  const base64AuthHeader = Buffer.from(`${OIDC_CLIENT_ID}:${OIDC_SECRET}`).toString('base64');
+  const request = await fetch('https://login-test.it.helsinki.fi/idp/profile/oidc/token', {
+    method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': `Basic ${base64AuthHeader}`
+>>>>>>> 395ab97 (client_secret_basic Authentication header must be in base64)
       },
       body: {
         code: code,
