@@ -103,7 +103,7 @@ app.get('/api/login', async (req, res) => {
 
 // gets the user code from the OIDC provider and exchanges it for an access token
 app.get('/api/login/callback', async (req, res) => {
- 
+  console.log('using custom callback url');
   //gets the user code from the OIDC provider and exchanges it for an access token
   const OIDC_SECRET = process.env.OIDC_CLIENT_SECRET;
   const OIDC_CLIENT_ID = process.env.OIDC_CLIENT_ID;
