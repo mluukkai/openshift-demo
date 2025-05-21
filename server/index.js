@@ -103,7 +103,7 @@ app.get('/api/login', async (req, res) => {
 
 // gets the user code from the OIDC provider and exchanges it for an access token
 app.get('/api/login/callback', async (req, res) => {
-  console.log('using custom callback url v.1.3');
+  console.log('using custom callback url v.1.4');
   //gets the user code from the OIDC provider and exchanges it for an access token
   const OIDC_SECRET = process.env.OIDC_CLIENT_SECRET;
   const OIDC_CLIENT_ID = process.env.OIDC_CLIENT_ID;
@@ -189,16 +189,16 @@ const exchangeCodeClientSecretBasic= async (endpoint, code, client_id, client_se
 
 
   const authHeader = Buffer.from(`${encodeURIComponent(client_id)}:${encodeURIComponent(client_secret)}`).toString('base64');
-  const request = await axios.post(endpoint,  
+  const request = await axios.post(endpoint, 
+    {
+      code: code,
+      redirect_uri: redirect_uri,
+      grant_type: 'authorization_code'
+    }, 
     {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
         'Authorization': `Basic ${authHeader}`
-      },
-      data: {
-        code: code,
-        redirect_uri: redirect_uri,
-        grant_type: 'authorization_code'
       }
   })
   console.log('request', request);
