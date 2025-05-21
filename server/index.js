@@ -183,8 +183,13 @@ const exchangeCodeClientSecretPost = async (endpoint, code, client_id, client_se
 
 
 const exchangeCodeClientSecretBasic= async (endpoint, code, client_id, client_secret, redirect_uri) => {
+  console.log('exchanging code for token');
+  console.log('code', code);
+  console.log('client_id', client_id);
+
+
   const authHeader = Buffer.from(`${client_id}:${client_secret}`).toString('base64');
-  const request = await axios.post(endpoint,
+  const request = await axios.post('https://login-test.it.helsinki.fi/idp/profile/oidc/authorize',
     new URLSearchParams({
       code: code,
       redirect_uri: redirect_uri,
@@ -195,7 +200,7 @@ const exchangeCodeClientSecretBasic= async (endpoint, code, client_id, client_se
         'Authorization': `BASIC ${authHeader}`
       },
   })
-  
+  console.log('request', request);
   const access_token = request.data.access_token;
   const id_token = request.data.id_token;
   
