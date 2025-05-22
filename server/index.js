@@ -115,7 +115,6 @@ app.get('/api/login/callback', async (req, res) => {
   // The values for the token endpoint and userinfo endpoint are from https:///login-test.it.helsinki.fi/.well-known/openid-configuration
   // They could also be fetched during runtime, but in this demo they are defined in the environment variables.
   // Token endpoint gives an access token and needs the client id, secret and user code for authentication
-
   const OIDC_TOKEN_ENDPOINT = `${process.env.OIDC_BASE_URL}/idp/profile/oidc/token`;
   const tokens = await exchangeCodeClientSecretBasic(OIDC_TOKEN_ENDPOINT, req.query.code, OIDC_CLIENT_ID, OIDC_SECRET, OIDC_REDIRECT_URI);
 
@@ -134,8 +133,7 @@ app.get('/api/login/callback', async (req, res) => {
   res.redirect('/');
 });
 
-const exchangeCodeClientSecretBasic= async (endpoint, code, client_id, client_secret, redirect_uri) => {
-
+const exchangeCodeClientSecretBasic = async (endpoint, code, client_id, client_secret, redirect_uri) => {
   const authHeader = Buffer.from(`${encodeURIComponent(client_id)}:${encodeURIComponent(client_secret)}`).toString('base64');
   const request = await axios.post(endpoint, 
     {
