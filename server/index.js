@@ -134,6 +134,31 @@ app.get('/api/login/callback', async (req, res) => {
   res.redirect('/');
 });
 
+const exchangeCodeClientSecretBasic= async (endpoint, code, client_id, client_secret, redirect_uri) => {
+
+  const authHeader = Buffer.from(`${encodeURIComponent(client_id)}:${encodeURIComponent(client_secret)}`).toString('base64');
+  const request = await axios.post(endpoint, 
+    {
+      code: code,
+      redirect_uri: redirect_uri,
+      grant_type: 'authorization_code'
+    }, 
+    {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': `Basic ${authHeader}`
+      }
+  })
+
+  const access_token = request.data.access_token;
+  const id_token = request.data.id_token;
+  
+  return {
+    access_token,
+    id_token
+  }
+}
+
 app.get('/api/ping', async (req, res) => {
   res.json({ message: 'pong' });
 });
@@ -153,85 +178,6 @@ app.post('/api/counter', async (req, res) => {
   res.json({ value: counter });
 })
 
-
-
-const exchangeCodeClientSecretPost = async (endpoint, code, client_id, client_secret, redirect_uri) => {
-  const request = await axios.post(endpoint, 
-    new URLSearchParams({
-      code: code, // the user code received from the OIDC provider
-      client_id: client_id,
-      client_secret: client_secret,
-      redirect_uri: redirect_uri,
-      grant_type: 'authorization_code'
-    }).toString(),
-    {
-    headers: { 
-      'Content-Type': 'application/x-www-form-urlencoded'
-    }
-  }
-  );
-  const access_token = request.data.access_token;
-  const id_token = request.data.id_token;
-  
-
-  return {
-    access_token,
-    id_token
-  }
-}
-
-
-
-const exchangeCodeClientSecretBasic= async (endpoint, code, client_id, client_secret, redirect_uri) => {
-  console.log('exchanging code for token');
-  console.log('code', code);
-  console.log('client_id', client_id);
-
-
-  const authHeader = Buffer.from(`${encodeURIComponent(client_id)}:${encodeURIComponent(client_secret)}`).toString('base64');
-  const request = await axios.post(endpoint, 
-    {
-      code: code,
-      redirect_uri: redirect_uri,
-      grant_type: 'authorization_code'
-    }, 
-    {
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': `Basic ${authHeader}`
-      }
-  })
-  console.log('request', request);
-  const access_token = request.data.access_token;
-  const id_token = request.data.id_token;
-  
-  return {
-    access_token,
-    id_token
-  }
-}
-
-
-
-
-app.get('/api/login', async (req, res) => {
-  const OIDC_BASE_URL = process.env.OIDC_BASE_URL;
-  const OIDC_CLIENT_ID = process.env.OIDC_CLIENT_ID;
-  const OIDC_REDIRECT_URI = process.env.OIDC_REDIRECT_URI;
-
-  console.log('/api/login')
-
-  const authorizeUrl = `https://login-test.it.helsinki.fi/idp/profile/oidc/authorize?response_type=code&client_id=${encodeURIComponent(OIDC_CLIENT_ID)}&redirect_uri=${encodeURIComponent(OIDC_REDIRECT_URI)}&scope=openid%20profile%20uid%20name`;
-
-  console.log('redirecting to', authorizeUrl);
-
-  res.redirect(authorizeUrl);
-});
-
-app.get('/api/logout', async (req, res) => {
-  res.redirect('/')
-});
-
 app.get('/api/user', async (req, res) => {
   if (req.user) {
     res.json(req.user);
@@ -240,17 +186,18 @@ app.get('/api/user', async (req, res) => {
   }
 });
 
+
 // jos ollaan tuotannossa, tarjotaan dist-hakemistoon käännetty frontend sovelluksen juuriosoiteessa
 if (process.env.NODE_ENV === 'production') {
   const DIST_PATH = path.resolve(__dirname, '../dist')
-
   const INDEX_PATH = path.resolve(DIST_PATH, 'index.html')
+
   app.use(express.static(DIST_PATH))
   app.get('/*any', (_, res) => res.sendFile(INDEX_PATH))
 }
 
 app.listen(PORT, async () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Server (OIDC login) running on http://localhost:${PORT}`);
   try {
     console.log('Connecting to the database in', dbUrl);
     await sequelize.authenticate();
