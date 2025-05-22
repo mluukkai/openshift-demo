@@ -1,4 +1,4 @@
 #!/bin/bash
 
-docker build --platform linux/amd64 -t mluukkai/demoapp:staging .; docker push mluukkai/demoapp:staging
-oc import-image demoapp:staging 
+docker build --platform linux/amd64 -t mluukkai/demoapp:login .; docker push mluukkai/demoapp:login
+oc import-image demoapp:login 

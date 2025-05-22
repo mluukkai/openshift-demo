@@ -18,7 +18,7 @@ function App() {
       .then(response => {
         setUser(response.data)
       })
-      .catch(error => {
+      .catch(() => {
         console.log('not logged in')
       })
   }, [])

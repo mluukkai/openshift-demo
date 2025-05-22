@@ -5,7 +5,6 @@ const cors = require('cors');
 const { RedisStore } = require("connect-redis")
 const Redis = require("ioredis");
 
-
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config();
 }
@@ -151,7 +150,7 @@ app.listen(PORT, async () => {
   const { setupAuthentication }  = await import('./oicd.mjs');
 
   await setupAuthentication()
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Server (passport login) running on http://localhost:${PORT}`);
   try {
     console.log('Connecting to the database in', dbUrl);
     await sequelize.authenticate();
